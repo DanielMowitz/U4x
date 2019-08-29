@@ -1,0 +1,16 @@
+[package]
+name = "frame"
+version = "0.1.0"
+authors = ["TheLie0 <daniel.mowitz@online.de>"]
+
+[dependencies]
+rand = "0.5.5"
+sdl2 = "0.32"
+
+[lib]
+name = "frame"
+path = "src/lib.rs"
+
+[[bin]]
+name = "viewer"
+path = "src/bin.rs"
