@@ -1,6 +1,6 @@
 # Rust-Sdl-Framework
 
-An SDL2-based 2D-game framework based on unsigned 4-bit integers written in Rust. An example binary can be found under /src/bin.rs
+An SDL2-based 2D-game framework based on unsigned 4-bit integers written in Rust. An example binary can be found under [src/bin.rs](src/bin.rs)
 
 ## Colors
 
