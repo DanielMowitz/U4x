@@ -8,11 +8,6 @@ pub trait Scene<'a> {
 	fn receive_menu_sub_action(&mut self, sub_action: &super::action::MenuSubAction) -> super::store::ReceiveMSAReturnOption;
 }
 
-pub enum ReceiveMSAReturnOption {
-	NoNewAction(),
-	NewAction(Vec<super::action::MenuSubAction>),
-}
-
 pub struct MinimalScene {
 	button: super::button::Button
 }
