@@ -43,7 +43,7 @@ impl<'a> Dispatcher<'a> {
 			max_stack_time,
 			current_stack_start_time: Instant::now(),
 			dt: 0.0,
-		};
+		}
 	}
 
 	/// Works through the two stacks and dispatches the topmost
@@ -222,18 +222,23 @@ impl<'a> Dispatcher<'a> {
 		match self.store_refs.take() {
 			Some(x) => {
 				local_store_refs = x;
-				for reference in references {
-					local_store_refs.push(Some(reference));
-				}
 			}
 			_ => {
 				local_store_refs = vec![];
-				for reference in references {
-					local_store_refs.push(Some(reference));
-				}
 			}
 		}
 
+		for reference in references {
+			local_store_refs.push(Some(reference));
+		}
+
 		self.store_refs = Some(local_store_refs);
+	}
+
+	///Used to drop all Store references before ending the game loop
+	pub fn drop_refs(&mut self) {
+		match self.store_refs.take(){
+			_ => {}
+		}
 	}
 }
