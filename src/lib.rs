@@ -18,8 +18,12 @@ pub mod scene_manager;
 mod tests;
 
 /// "Front-end"-function of the dispatcher
-pub fn game_loop<'a>(disp: &'a mut dispatcher::Dispatcher<'a>, store_refs: Vec<&'a mut store::Store<'a>>) {
-	disp.enter_refs(store_refs);
+pub fn game_loop<'a>(mut disp: & mut dispatcher::Dispatcher<'a>, store_refs: Vec<&'a mut store::Store<'a>>) {
 
-	while disp.dispatch() {};
+		disp.enter_refs(store_refs);
+
+		while disp.dispatch() {};
+
+		disp.drop_refs();
+
 }
