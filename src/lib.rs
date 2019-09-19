@@ -3,6 +3,8 @@
 extern crate rand;
 extern crate sdl2;
 
+use dispatcher::Dispatcher;
+
 pub mod dispatcher;
 pub mod action;
 pub mod store;
@@ -18,8 +20,12 @@ pub mod scene_manager;
 mod tests;
 
 /// "Front-end"-function of the dispatcher
-pub fn game_loop<'a>(disp: &'a mut dispatcher::Dispatcher<'a>, store_refs: Vec<&'a mut store::Store<'a>>) {
-	disp.enter_refs(store_refs);
+pub fn game_loop<'a>(mut disp: & mut dispatcher::Dispatcher<'a>, store_refs: Vec<&'a mut store::Store<'a>>) { //todo: HMM
 
-	while disp.dispatch() {};
+		disp.enter_refs(store_refs);
+
+		while disp.dispatch() {};
+
+		disp.drop_refs();
+
 }
