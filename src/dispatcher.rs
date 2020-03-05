@@ -1,8 +1,6 @@
 use std::collections::VecDeque;
 use std::time::Instant;
 
-use sdl2::Sdl;
-
 use action::Action::MenuAction;
 
 use super::action::*;
@@ -106,7 +104,7 @@ impl<'a> Dispatcher<'a> {
 						* order at the same time.
 						*/
 						Some(in_reference) => {
-							self.dt = self.current_stack_start_time.elapsed().as_float_secs();
+							self.dt = self.current_stack_start_time.elapsed().as_secs_f64();
 							match in_reference.receive_action(&in_action, &self.dt) {
 								ReceiveActionReturnOption::NewAction(out_action_vec, add_to_secondary, out_reference) => {
 									if add_to_secondary {
@@ -136,11 +134,11 @@ impl<'a> Dispatcher<'a> {
 		return true;
 	}
 
-	/// Used in the sipatch function.
+	/// Used in the dispatch function.
 	/// returns the appropriate action from the appropriate Stack.
 	fn get_in_action(&mut self) -> Option<Action> {
 		if self.use_secondary {
-			if self.current_stack_start_time.elapsed().as_float_secs() >= self.max_stack_time {
+			if self.current_stack_start_time.elapsed().as_secs_f64() >= self.max_stack_time {
 				return Some(Action::EndFrameAction);
 			} else {
 				match self.secondary_action_queue.pop_front() {
@@ -170,7 +168,7 @@ impl<'a> Dispatcher<'a> {
 							}
 						}
 						None => {
-							if self.current_stack_start_time.elapsed().as_float_secs() >= self.max_stack_time {
+							if self.current_stack_start_time.elapsed().as_secs_f64() >= self.max_stack_time {
 								return Some(Action::EndFrameAction);
 							} else {
 								self.use_secondary = true;
@@ -202,7 +200,6 @@ impl<'a> Dispatcher<'a> {
 				}
 			}
 		}
-		return None;
 	}
 
 	///Adds an action to the primary stack.

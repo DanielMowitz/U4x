@@ -1,33 +1,30 @@
 extern crate frame;
 extern crate sdl2;
 
-use std::fs::File;
+use frame::scene_manager::SceneManager;
 
-use frame::img::Img;
+mod main_menu;
+mod space_ship;
+mod light_path;
 
-/// An example use of the framework
 fn main() {
-	let mut example_img = frame::img::Img::new_from_u8(4, vec![]);
 
-	match File::open("./resources/test_img.u4i") {
-		Ok(f) => {
-			example_img = Img::new_from_File(f);
-		}
-		Err(e) => {
-			print!("{}", e);
-		}
-	}
+	let mut ship = space_ship::Spaceship::new();
+	let mut renderer = frame::renderer::Renderer::new(512, 512, None);
 
-	let example_sprite = frame::sprite::Sprite::new((0, 0), vec![example_img], vec![(0, 1)], 60.0);
-	let mut example_game_obj = frame::example_obj::ExampleObj::new(example_sprite);
-	let mut example_renderer = frame::renderer::Renderer::new(255, 255, None);
-	let mut example_disp = frame::dispatcher::Dispatcher::new(1.0 / 60.0);
+	let mut menu = main_menu::MainMenu::new();
+	let mut scene_manager = SceneManager::new();
+
+	scene_manager.add_scenes(vec![&mut menu]);
+
+	let mut disp = frame::dispatcher::Dispatcher::new(1.0 / 60.0);
 
 	frame::game_loop(
-		&mut example_disp,
+		&mut disp,
 		vec![
-			&mut example_game_obj,
-			&mut example_renderer,
+			&mut ship,
+			&mut renderer,
+			&mut scene_manager,
 		],
 	);
 }

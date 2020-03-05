@@ -1,15 +1,11 @@
 use std::fs::File;
 use std::io::Read;
 
-use super::action::Action;
-use super::dispatcher::Dispatcher;
 use super::img::Img;
-use super::renderer::Renderer;
-use super::store::Store;
 
 pub struct Sprite {
 	///A sprite with animations (using the function animate)
-	pos: (u8, u8),
+	pos: (u32, u32),
 	frames: Vec<Img>,
 	anims: Vec<(usize, usize)>,
 	current_anim: usize,
@@ -20,7 +16,7 @@ pub struct Sprite {
 
 /// Wrapper for the Img struct that handles animations and location.
 impl Sprite {
-	pub fn new(pos: (u8, u8), frames: Vec<Img>, anims: Vec<(usize, usize)>, framerate: f64) -> Self {
+	pub fn new(pos: (u32, u32), frames: Vec<Img>, anims: Vec<(usize, usize)>, framerate: f64) -> Self {
 		Self {
 			pos,
 			frames,
@@ -46,16 +42,16 @@ impl Sprite {
 		}
 	}
 
-	pub fn get_pos(&self) -> (u8, u8) { return self.pos.clone(); }
+	pub fn get_pos(&self) -> (u32, u32) { return self.pos.clone() }
 
-	pub fn set_pos(&mut self, pos: (u8, u8)) { self.pos = pos }
+	pub fn set_pos(&mut self, pos: (u32, u32)) { self.pos = pos }
 
-	pub fn get_width(&self) -> i32 {
-		return self.get_current_frame().get_width().clone() as i32;
+	pub fn get_width(&self) -> u32 {
+		return self.get_current_frame().get_width().clone() as u32;
 	}
 
-	pub fn get_height(&self) -> i32 {
-		return self.get_current_frame().get_pixels().len() as i32 / *self.get_current_frame().get_width() as i32;
+	pub fn get_height(&self) -> u32 {
+		return 2 * (self.get_current_frame().get_length() / *self.get_current_frame().get_width()) as u32;
 	}
 
 	pub fn get_current_frame(&self) -> Img {
@@ -63,14 +59,17 @@ impl Sprite {
 	}
 
 	/// Wraps Img::new_from_file.
-	pub fn new_from_File(mut f: File, pix_per_frame: usize, pos: (u8, u8), anims: Vec<(usize, usize)>, framerate: f64) -> Self {
+	pub fn new_from_file(mut f: File, pix_per_frame: usize, pos: (u32, u32), anims: Vec<(usize, usize)>, framerate: f64) -> Self {
 		let mut width = 0;
 		let mut pixels = vec![];
 		let mut frames = vec![];
 		let real_pix_per_frame = pix_per_frame / 2;
 
 		let mut buf: Vec<u8> = vec![];
-		f.read_to_end(&mut buf);
+		match f.read_to_end(&mut buf) {
+			Ok(_) => {},
+			Err(e) => eprintln!("Could not read image buffer: {}", e),
+		}
 
 		if buf.len() < 4 {
 			return Self {
@@ -86,7 +85,7 @@ impl Sprite {
 
 		let mut ctr = 0;
 
-		for (num) in buf.iter() {
+		for num in buf.iter() {
 			if ctr >= 4 {
 				if (ctr - 4) % real_pix_per_frame == 0 {
 					pixels = vec![*num];
@@ -112,6 +111,6 @@ impl Sprite {
 			current_frame: 0,
 			dt_since_last_frame: 0.0,
 			framerate,
-		};
+		}
 	}
 }

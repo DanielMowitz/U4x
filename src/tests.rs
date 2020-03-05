@@ -14,7 +14,7 @@ use action::MenuSubAction;
 use button::Button;
 use scene_manager::MinimalScene;
 use scene_manager::SceneManager;
-use test_obj::TestObj;
+use test_object::TestObj;
 
 use super::action::Action;
 use super::dispatcher::Dispatcher;
@@ -86,7 +86,7 @@ fn test_renderer() {
 
 	match File::open("./resources/test_img.u4i") {
 		Ok(f) => {
-			test_img = Img::new_from_File(f);
+			test_img = Img::new_from_file(f);
 		}
 		Err(e) => {
 			print!("{}", e);
@@ -104,7 +104,7 @@ fn test_sprites_and_menus() {
 
 	match File::open("./resources/test_sprite.u4i") {
 		Ok(f) => {
-			test_sprite = Sprite::new_from_File(
+			test_sprite = Sprite::new_from_file(
 				f,
 				16,
 				(0, 0),
@@ -121,7 +121,7 @@ fn test_sprites_and_menus() {
 
 	match File::open("./resources/exit_button.u4i") {
 		Ok(f) => {
-			button_sprite = Sprite::new_from_File(
+			button_sprite = Sprite::new_from_file(
 				f,
 				133,
 				(0, 0),

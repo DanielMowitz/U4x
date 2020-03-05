@@ -1,6 +1,5 @@
 use super::action::Action;
 use super::action::MenuSubAction;
-use super::dispatcher::Dispatcher;
 
 pub enum ReceiveActionReturnOption<'a> {
 	NoNewAction(&'a mut Store<'a>),

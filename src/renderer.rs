@@ -1,16 +1,13 @@
 extern crate sdl2;
 
-use std::string;
 use std::thread::sleep;
-use std::time::{Duration, Instant};
+use std::time::Duration;
 use std::vec::Vec;
 
 use sdl2::event::Event;
 use sdl2::EventPump;
 use sdl2::keyboard::Keycode;
 use sdl2::pixels::Color;
-use sdl2::pixels::PixelFormat;
-use sdl2::pixels::PixelFormatEnum;
 use sdl2::rect::Rect;
 use sdl2::render::Canvas;
 use sdl2::Sdl;
@@ -20,8 +17,6 @@ use sdl2::VideoSubsystem;
 use action::MenuSubAction;
 
 use super::action::Action;
-use super::dispatcher::Dispatcher;
-use super::dispatcher::MenuState;
 use super::img::Img;
 use super::store::ReceiveActionReturnOption;
 use super::store::Store;
@@ -33,6 +28,7 @@ pub struct Renderer {
 	video_subsystem: VideoSubsystem,
 	canvas: Canvas<Window>,
 	color_space: [Color; 15],
+	pixel_size: u32,
 }
 
 impl Renderer {
@@ -80,9 +76,11 @@ impl Renderer {
 			video_subsystem,
 			canvas,
 			color_space,
-		};
+			pixel_size: 8,
+		}
 	}
 
+	#[test]
 	pub fn test(&mut self, img: Img) -> bool {
 		print!("This is the Test function!\n");
 		self.canvas.set_draw_color(Color::RGB(0, 0, 0));
@@ -104,7 +102,7 @@ impl Renderer {
 	}
 
 	///Adds an image to the canvas in the desired location
-	pub fn add_to_canvas(&mut self, x: u8, y: u8, i: Img) {
+	pub fn add_to_canvas(&mut self, x: u32, y: u32, i: Img) {
 		let mask: u8 = 0b00001111;
 		let alpha_value: u8 = 15;
 
@@ -125,9 +123,17 @@ impl Renderer {
 					right order*/
 					let x_i32 = (x_img * 2) as i32 + x as i32 + (1 - i);
 					let y_i32 = y_img as i32 + y as i32;
-					let drawing_rect = Rect::new(8 * x_i32, 8 * y_i32, 8, 8);
-					self.canvas.fill_rect(drawing_rect);
-					self.canvas.draw_rect(drawing_rect);
+					let drawing_rect = Rect::new(self.pixel_size as i32 * x_i32, self.pixel_size as i32 * y_i32, self.pixel_size, self.pixel_size);
+
+					match self.canvas.fill_rect(drawing_rect) {
+						Ok(_) => {},
+						Err(e) => eprintln!("Could not fill shape:{}", e),
+					}
+
+					match self.canvas.draw_rect(drawing_rect) {
+						Ok(_) => {},
+						Err(e) => eprintln!("Could not draw shape:{}", e),
+					}
 				}
 			}
 		}
@@ -149,6 +155,13 @@ impl Renderer {
 		self.color_space = space;
 	}
 
+	pub fn get_canvas_size(&mut self) -> (u32, u32) {
+		match self.canvas.output_size() {
+			Ok(r) => (r.0, r.1),
+			_ => (0, 0)
+		}
+	}
+
 	/// This function is used for all user input (i.e. Mouse, Keyboard...)
 	fn handle_inputs(&mut self) -> Vec<Action> {
 		let mut out_vec: Vec<Action> = vec![];
@@ -160,7 +173,13 @@ impl Renderer {
 				Event::KeyDown { keycode: Some(Keycode::Escape), .. } => {
 					out_vec.push(Action::MenuAction(MenuSubAction::ChangeMenuStateAction));
 				}
-				//todo: maybe implement mouseaction here too
+				Event::KeyDown { scancode, ..} => {
+					match scancode {
+						Some(c) => out_vec.push(Action::KeyboardAction(c)),
+						None => {}
+					}
+				}
+				//maybe mouseaction will be implemented here too some day…
 				_ => {}
 			};
 		};
@@ -181,7 +200,7 @@ impl Renderer {
 				x, y, timestamp,
 				window_id, which, mouse_btn, clicks
 			} => {
-				out_vec.push(Action::MenuAction(MenuSubAction::ClickAction(x, y, mouse_btn)));
+				out_vec.push(Action::MenuAction(MenuSubAction::ClickAction(x, y, mouse_btn, self.pixel_size)));
 			}
 			_ => {}
 		};
@@ -205,9 +224,10 @@ impl<'a> Store<'a> for Renderer {
 				return ReceiveActionReturnOption::NoNewAction(self);
 			}
 			&Action::EndFrameAction => {
+				let size = self.get_canvas_size();
 				let mut out_vec = self.handle_inputs();
 				out_vec.push(Action::UpdateAction);
-				out_vec.push(Action::SendFrameAction);
+				out_vec.push(Action::SendFrameAction(size.0, size.1, self.pixel_size));
 				out_vec.push(Action::DrawAction(true));
 				return ReceiveActionReturnOption::NewAction(
 					out_vec,
@@ -239,3 +259,5 @@ impl<'a> Store<'a> for Renderer {
 		}
 	}
 }
+
+//todo: render layers?

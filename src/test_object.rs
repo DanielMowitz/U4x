@@ -1,16 +1,14 @@
-use action::{Action, MenuSubAction};
-use dispatcher::Dispatcher;
-use img::Img;
+use action::Action;
 use sprite::Sprite;
 use store::ReceiveActionReturnOption;
 use store::Store;
 
-pub struct TestObj {
+pub struct TestObject {
 	///A game object for testing
 	sprite: Option<Sprite>,
 }
 
-impl<'a> TestObj {
+impl<'a> TestObject {
 	pub fn new(sprite: Sprite) -> Self {
 		Self {
 			sprite: Some(sprite),
@@ -36,10 +34,10 @@ impl<'a> TestObj {
 	}
 }
 
-impl<'a> Store<'a> for TestObj {
+impl<'a> Store<'a> for TestObject {
 	fn receive_action(&'a mut self, action: &Action, dt: &f64) -> ReceiveActionReturnOption<'a> {
 		match action {
-			&Action::SendFrameAction => {
+			&Action::SendFrameAction(w, h, p) => {
 				return ReceiveActionReturnOption::NewAction(
 					vec!(
 						self.send_frame(dt.clone())

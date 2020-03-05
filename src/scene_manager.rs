@@ -3,6 +3,7 @@ use sdl2::mouse::MouseButton;
 use action::{Action, MenuSubAction};
 use store;
 
+
 pub trait Scene<'a> {
 	//elements: vec<frame::game_obj::GameObj>
 	fn receive_menu_sub_action(&mut self, sub_action: &super::action::MenuSubAction) -> super::store::ReceiveMSAReturnOption;
@@ -26,15 +27,15 @@ impl<'a> Scene<'a> for MinimalScene {
 			super::action::MenuSubAction::DrawAction => {
 				return super::store::ReceiveMSAReturnOption::NewAction(
 					vec!(
-						self.button.send_frame(), //todo:hier testen
+						self.button.send_frame(),
 					),
 					self,
 				);
 			}
 
-			super::action::MenuSubAction::ClickAction(x, y, mouse_btn) => {
+			super::action::MenuSubAction::ClickAction(x, y, mouse_btn, pix_size) => {
 				match mouse_btn {
-					MouseButton::Left => match self.button.check_click(x, y) {
+					MouseButton::Left => match self.button.check_click(*x as u32, *y as u32, pix_size.clone()) {
 						Some(msa) => return super::store::ReceiveMSAReturnOption::NewAction(vec![msa], self),
 						None => return super::store::ReceiveMSAReturnOption::NoNewAction(self)
 					},
@@ -52,7 +53,7 @@ impl<'a> Scene<'a> for MinimalScene {
 /// Very similar to the dispatcher, the SceneManager supervises menus.
 pub struct SceneManager<'a> {
 	scenes: Option<Vec<Option<&'a mut Scene<'a>>>>,
-	//For an explaination of this look below. todo:better comment lol
+	// Works exactly lke the dispatchers store refs.
 	current_scene: usize,
 }
 
@@ -110,7 +111,7 @@ impl<'a> super::store::Store<'a> for SceneManager<'a> {
 				}
 
 				match self.scenes.take() {
-					//Psyche! Look at the similar function in dispatcher.
+					//As noted above, to understand this better look at the similar function in dispatcher.
 					Some(mut local_scenes) => {
 						for index in 0..local_scenes.len() {
 							match local_scenes[index].take() {
@@ -135,7 +136,7 @@ impl<'a> super::store::Store<'a> for SceneManager<'a> {
 						super::store::ReceiveActionReturnOption::NewAction(out_actions, false, self)
 					}
 					None => {
-						panic!("No scenes yet ( ͡° ͜ʖ ͡°)");
+						eprintln!("No scenes yet ( ͡° ͜ʖ ͡°)");
 						super::store::ReceiveActionReturnOption::NoNewAction(self)
 					}
 				}

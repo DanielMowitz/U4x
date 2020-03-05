@@ -1,4 +1,3 @@
-use std::fmt::Error;
 use std::fs::File;
 use std::io::Read;
 
@@ -12,7 +11,7 @@ pub struct Img {
 
 impl Img {
 	/// Creates new Img from u8 vector.
-	pub fn new_from_u8(mut width: usize, pixels: Vec<u8>) -> Self {
+	pub fn new_from_u8(width: usize, pixels: Vec<u8>) -> Self {
 		Self {
 			width,
 			current_px: 0,
@@ -21,12 +20,15 @@ impl Img {
 	}
 
 	/// Reads file into Img.
-	pub fn new_from_File(mut f: File) -> Self {
+	pub fn new_from_file(mut f: File) -> Self {
 		let mut width = 0;
 		let mut pixels = vec![];
 
 		let mut buf: Vec<u8> = vec![];
-		f.read_to_end(&mut buf);
+		match f.read_to_end(&mut buf) {
+			Ok(_) => {},
+			Err(e) => eprintln!("Could not open image buffer:{}", e),
+		}
 
 		if buf.len() < 4 {
 			return Self {
@@ -38,7 +40,7 @@ impl Img {
 
 		let mut ctr = 0;
 
-		for (num) in buf.iter() {
+		for num in buf.iter() {
 			if ctr >= 4 {
 				pixels.push(*num);
 			} else {
@@ -63,6 +65,10 @@ impl Img {
 	pub fn get_width(&self) -> &usize {
 		&self.width
 	}
+
+	/// Returns length of pixel vector
+	pub fn get_length(&self) -> usize { *&self.pixels.len().clone() }
+
 }
 
 impl Iterator for Img {
